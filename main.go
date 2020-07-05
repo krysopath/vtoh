@@ -37,10 +37,11 @@ var (
 		"tf-stage-internal-vault-storage",
 		".vault-tokens",
 	)
-	VAULT_ADDR string = os.Getenv("VAULT_ADDR")
-	hashedAddr string = hash(VAULT_ADDR)
-	gitRef     string = ""
-	gitTag     string = ""
+	VAULT_ADDR      string = os.Getenv("VAULT_ADDR")
+	VAULT_TOKEN_SRC string = os.Getenv("VAULT_TOKEN_SRC")
+	hashedAddr      string = hash(VAULT_ADDR)
+	gitRef          string = ""
+	gitTag          string = ""
 )
 
 type Backend interface {
@@ -61,6 +62,7 @@ func (ts *TokenStore) Init() {
 	}
 
 	var backend Backend
+
 	switch source.Scheme {
 	case "file":
 		backend = FileBackend{FilePath: source.Path}
@@ -92,9 +94,13 @@ func main() {
 		fmt.Fprintln(os.Stderr, "err: VAULT_ADDR is unset")
 		os.Exit(100)
 	}
+	if len(VAULT_TOKEN_SRC) == 0 {
+		fmt.Fprintln(os.Stderr, "err: VAULT_TOKEN_SRC is unset")
+		os.Exit(101)
+	}
 	if len(os.Args) >= 2 {
 		ts := &TokenStore{
-			DataSourceURI: fmt.Sprintf("s3://%s", s3Object),
+			DataSourceURI: VAULT_TOKEN_SRC,
 		}
 		ts.Init()
 		switch os.Args[1] {

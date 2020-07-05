@@ -1,8 +1,11 @@
 # usage
 
-A simple vault token helper written in golang. Do not use, just put in $PATH: Vault will use it. Token helpers are meant to help with storage and retrieval of vault tokens. 
+A simple vault token helper written in golang. Do not use, just put in $PATH:
+Vault will use it. Token helpers are meant to help with storage and retrieval
+of vault tokens. 
 
-> This one helper stores valid token in a per VAULT_ADDR keyed map, making working with many VAULT_ADDR a comforting reality..
+> This one helper stores valid token in a per VAULT_ADDR keyed map, making
+> working with many VAULT_ADDR a comforting reality..
 
 # installation
 
@@ -13,6 +16,19 @@ go mod graph > deps.txt
 go build -ldflags='-s -w -X main.gitTag=0.0.0 -X main.gitRef=3e79321' -o build/bin/token-helper
 sudo cp build/bin/token-helper /usr/bin/token-helper
 ```
+
+# backends
+
+Currently supported:
+- `FileBackend`,  `VAULT_TOKEN_SRC=file:///path/to/file`
+- `S3Backend`, `VAULT_TOKEN_SRC=s3://path/to/object`
+
+To select a backend, set `VAULT_TOKEN_SRC`:
+```
+export VAULT_TOKEN_SRC=s3://personal-secret-bucket/tokens
+```
+
+e.g. would use the bucket `personal-secret-bucket` and `tokens` as storage object
 
 # configuration
 
@@ -27,5 +43,5 @@ token_helper = "/usr/bin/token-helper"
 
 # outlook
 
-- crypto layer with gpg for `~/.vault-tokens` file
+- crypto backend with gpg for `~/.vault-tokens` file
 

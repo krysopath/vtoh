@@ -9,7 +9,6 @@ import (
 
 type FileBackend struct {
 	FilePath string
-	Data     map[string]interface{} `yaml:"data"`
 }
 
 func (backend FileBackend) Load() ([]byte, error) {
