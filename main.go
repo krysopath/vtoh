@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"crypto/sha256"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -88,31 +87,6 @@ func usage() {
 	)
 }
 
-func get(ts *TokenStore) {
-	token, _ := ts.Data[hashedAddr].(string)
-	fmt.Fprintf(os.Stdout, "%s", token)
-}
-func store(ts *TokenStore) {
-	reader := bufio.NewReader(os.Stdin)
-	token, _ := reader.ReadString('\n')
-	ts.Data[hashedAddr] = token
-}
-
-func erase(ts *TokenStore) {
-	_, ok := ts.Data[hashedAddr]
-	if ok {
-		delete(ts.Data, hashedAddr)
-	}
-}
-
-func sync(ts *TokenStore) {
-	dataBytes, err := yaml.Marshal(ts.Data)
-	if err != nil {
-		panic(err)
-	}
-	ioutil.WriteFile(StoreFilePath, dataBytes, 0400)
-}
-
 func main() {
 	if len(VAULT_ADDR) == 0 {
 		fmt.Fprintln(os.Stderr, "err: VAULT_ADDR is unset")
@@ -125,16 +99,23 @@ func main() {
 		ts.Init()
 		switch os.Args[1] {
 		case "get":
-			get(ts)
+			token, _ := ts.Data[hashedAddr].(string)
+			fmt.Fprintf(os.Stdout, "%s", token)
 		case "store":
-			store(ts)
+			reader := bufio.NewReader(os.Stdin)
+			token, _ := reader.ReadString('\n')
+			ts.Data[hashedAddr] = token
 		case "erase":
-			erase(ts)
+			delete(ts.Data, hashedAddr)
 		default:
 			usage()
 			os.Exit(1)
 		}
-		sync(ts)
+		storeBytes, err := yaml.Marshal(ts.Data)
+		if err != nil {
+			panic(err)
+		}
+		ts.Backend.Save(storeBytes)
 	} else {
 		usage()
 	}
