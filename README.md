@@ -14,6 +14,13 @@ go build -ldflags='-s -w -X main.gitTag=0.0.0 -X main.gitRef=3e79321' -o build/b
 sudo cp build/bin/token-helper /usr/bin/token-helper
 ```
 
+# configuration
+
+Create file at `~/.vault` with this content:
+```
+token_helper = "/usr/bin/token-helper"
+```
+
 # outlook
 
 - crypto layer with gpg for `~/.vault-tokens` file
