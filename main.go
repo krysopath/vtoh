@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -32,28 +33,49 @@ var (
 	StoreFilePath string = filepath.Join(
 		User.HomeDir, ".vault-tokens",
 	)
+	s3Object string = fmt.Sprintf(
+		"%s/%s",
+		"tf-stage-internal-vault-storage",
+		".vault-tokens",
+	)
 	VAULT_ADDR string = os.Getenv("VAULT_ADDR")
 	hashedAddr string = hash(VAULT_ADDR)
 	gitRef     string = ""
 	gitTag     string = ""
 )
 
-type TokenStore struct {
-	FilePath string                 `yaml:"file_path"`
-	Data     map[string]interface{} `yaml:"data"`
+type Backend interface {
+	Load() ([]byte, error)
+	Save([]byte) (bool, error)
 }
 
-func (ts *TokenStore) Load() {
-	if _, err := os.Stat(ts.FilePath); err == nil {
-		content, err := ioutil.ReadFile(ts.FilePath)
-		if err != nil {
-			panic(err)
-		}
-		yaml.Unmarshal(content, &ts.Data)
-	} else {
-		ts.Data = map[string]interface{}{}
+type TokenStore struct {
+	Backend       Backend                `yaml:"backend"`
+	DataSourceURI string                 `yaml:"source_uri"`
+	Data          map[string]interface{} `yaml:"data"`
+}
+
+func (ts *TokenStore) Init() {
+	source, err := url.Parse(ts.DataSourceURI)
+	if err != nil {
+		panic(err)
 	}
 
+	var backend Backend
+	switch source.Scheme {
+	case "file":
+		backend = FileBackend{FilePath: source.Path}
+	case "s3":
+		backend = S3Backend{
+			Bucket: source.Host,
+			Region: "eu-central-1",
+			Path:   source.Path}
+	default:
+	}
+	ts.Backend = backend
+
+	content, _ := ts.Backend.Load()
+	yaml.Unmarshal(content, &ts.Data)
 }
 
 func usage() {
@@ -67,8 +89,8 @@ func usage() {
 }
 
 func get(ts *TokenStore) {
-	Token, _ := ts.Data[hashedAddr].(string)
-	fmt.Fprintf(os.Stdout, "%s", Token)
+	token, _ := ts.Data[hashedAddr].(string)
+	fmt.Fprintf(os.Stdout, "%s", token)
 }
 func store(ts *TokenStore) {
 	reader := bufio.NewReader(os.Stdin)
@@ -97,8 +119,10 @@ func main() {
 		os.Exit(100)
 	}
 	if len(os.Args) >= 2 {
-		ts := &TokenStore{FilePath: StoreFilePath}
-		ts.Load()
+		ts := &TokenStore{
+			DataSourceURI: fmt.Sprintf("s3://%s", s3Object),
+		}
+		ts.Init()
 		switch os.Args[1] {
 		case "get":
 			get(ts)

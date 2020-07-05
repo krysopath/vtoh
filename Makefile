@@ -9,5 +9,6 @@ build/bin/token-helper:  *.go go.* deps.txt
 	go build -ldflags=$(LD_FLAGS) -o build/bin/token-helper
 
 deps.txt: go.mod go.sum
+	go mod tidy
 	go get
 	go mod graph > deps.txt
