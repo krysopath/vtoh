@@ -29,7 +29,7 @@ export VAULT_TOKEN_SRC=s3://personal-secret-bucket/tokens
 ```
 > e.g. would use the bucket `personal-secret-bucket` and `tokens` as storage object
 
-Use `file://` to load the store local files:
+Use `file://` to load the store from a local file:
 ```
 export VAULT_TOKEN_SRC=file://$HOME/.vault-tokens
 ```
