@@ -51,13 +51,7 @@ func (ts *TokenStore) Load() {
 		}
 		yaml.Unmarshal(content, &ts.Data)
 	} else {
-		err := yaml.Unmarshal(
-			[]byte(`{}`),
-			&ts.Data,
-		)
-		if err != nil {
-			panic(err)
-		}
+		ts.Data = map[string]interface{}{}
 	}
 
 }
@@ -65,11 +59,10 @@ func (ts *TokenStore) Load() {
 func usage() {
 	fmt.Fprintf(os.Stderr,
 		`%s %s-%s
-	this token-helper is not meant to be executed directly
-
+	
+	important: this token helper is not meant to be executed directly
 	supported commands: get, store, erase
-
-	`, os.Args[0], gitTag, gitTag,
+`, os.Args[0], gitTag, gitRef,
 	)
 }
 
