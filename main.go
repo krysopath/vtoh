@@ -92,6 +92,10 @@ func sync(ts *TokenStore) {
 }
 
 func main() {
+	if len(VAULT_ADDR) == 0 {
+		fmt.Fprintln(os.Stderr, "err: VAULT_ADDR is unset")
+		os.Exit(100)
+	}
 	if len(os.Args) >= 2 {
 		ts := &TokenStore{FilePath: StoreFilePath}
 		ts.Load()

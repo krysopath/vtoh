@@ -21,6 +21,10 @@ Create file at `~/.vault` with this content:
 token_helper = "/usr/bin/token-helper"
 ```
 
+> `vault` will use the helper binary from now on
+
+> You will need to issue a `vault login` now
+
 # outlook
 
 - crypto layer with gpg for `~/.vault-tokens` file
