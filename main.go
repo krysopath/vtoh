@@ -79,11 +79,18 @@ func (ts *TokenStore) Init() {
 	yaml.Unmarshal(content, &ts.Data)
 }
 
+func config(data interface{}) {
+	configBytes, _ := yaml.Marshal(data)
+	fmt.Fprintf(os.Stderr, `%s`, configBytes)
+}
+
 func usage() {
 	fmt.Fprintf(os.Stderr,
 		`%s %s-%s
 	important: this token helper is not meant to be executed directly
-	supported commands: get, store, erase
+	supported commands: get, store, erase & config
+
+	where only config is intended to invoked interactively
 `, os.Args[0], gitTag, gitRef,
 	)
 }
@@ -112,6 +119,8 @@ func main() {
 			store.Data[hashedAddr] = token
 		case "erase":
 			delete(store.Data, hashedAddr)
+		case "config":
+			config(store)
 		default:
 			usage()
 			os.Exit(1)
