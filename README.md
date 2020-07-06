@@ -16,8 +16,14 @@ go mod graph > deps.txt
 go build -ldflags='-s -w -X main.gitTag=0.0.0 -X main.gitRef=3e79321' -o build/bin/token-helper
 sudo cp build/bin/token-helper /usr/bin/token-helper
 ```
+## configuration
 
-# backends
+Create file at `~/.vault` with this content:
+```
+token_helper = "/usr/bin/token-helper"
+```
+
+> `vault` will use the helper binary from now on
 
 Currently supported:
 - `FileBackend`,  `VAULT_TOKEN_SRC=file:///path/to/file`
@@ -35,42 +41,35 @@ Use `file://` to load the store from a local file:
 export VAULT_TOKEN_SRC=file://$HOME/.vault-tokens
 ```
 
-## FileBackend
+> You will need to issue a `vault login` now
 
-- stores token in a definable file
+### FileBackend
+
+- stores store in a definable file
 - plaintext
 - no dependencies
 
 > This file-based backend works very simple. 
 
-## GpgBackend
+### GpgBackend
 
-- uses gpg crypto to secure to token storage file
-- saves as friendly base64 string
+- uses gpg crypto to secure the token storage file
+- saves store as friendly base64 string
 - does not support interactive password prompts (vault itself does not allow working with stdin/out)
 - might integrate with gpg-agent in the future
 
 > The gold standard of crypto. We can do at least this.
 
-## S3Backend
+### S3Backend
 
 - use aws/s3 buckets
 - allows for ACL via IAM
 - serverside KMS
 - might allow user defined KMS keys in the future
 
-# configuration
-
-Create file at `~/.vault` with this content:
-```
-token_helper = "/usr/bin/token-helper"
-```
-
-> `vault` will use the helper binary from now on
-
-> You will need to issue a `vault login` now
 
 # outlook
 
-- crypto backend with gpg for `~/.vault-tokens` file
+- dbus backend
+- gpg-agent integration
 
