@@ -22,6 +22,7 @@ sudo cp build/bin/token-helper /usr/bin/token-helper
 Currently supported:
 - `FileBackend`,  `VAULT_TOKEN_SRC=file:///path/to/file`
 - `S3Backend`, `VAULT_TOKEN_SRC=s3://path/to/object`
+- `GpgBackend`, `VAULT_TOKEN_SRC=gpg://path/to/file`
 
 To select a backend, set `VAULT_TOKEN_SRC`:
 ```
@@ -33,6 +34,30 @@ Use `file://` to load the store from a local file:
 ```
 export VAULT_TOKEN_SRC=file://$HOME/.vault-tokens
 ```
+
+## FileBackend
+
+- stores token in a definable file
+- plaintext
+- no dependencies
+
+> This file-based backend works very simple. 
+
+## GpgBackend
+
+- uses gpg crypto to secure to token storage file
+- saves as friendly base64 string
+- does not support interactive password prompts (vault itself does not allow working with stdin/out)
+- might integrate with gpg-agent in the future
+
+> The gold standard of crypto. We can do at least this.
+
+## S3Backend
+
+- use aws/s3 buckets
+- allows for ACL via IAM
+- serverside KMS
+- might allow user defined KMS keys in the future
 
 # configuration
 

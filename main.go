@@ -66,6 +66,12 @@ func (ts *TokenStore) Init() {
 	switch source.Scheme {
 	case "file":
 		backend = FileBackend{FilePath: source.Path}
+	case "gpg":
+		backend = GpgBackend{
+			FilePath:    source.Path,
+			Recipients:  []string{"test@example.com"},
+			KeyRingHome: "/home/gve/src/token-helper/gnupg"}
+		//KeyRingHome: filepath.Join(User.HomeDir, ".gnupg")}
 	case "s3":
 		backend = S3Backend{
 			Bucket: source.Host,
