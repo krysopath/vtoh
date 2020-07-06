@@ -22,7 +22,7 @@ func (backend FileBackend) Load() ([]byte, error) {
 	return content, nil
 }
 
-func (backend FileBackend) Save(data []byte) (bool, error) {
+func (backend FileBackend) Save(data interface{}) (bool, error) {
 	dataBytes, yamlErr := yaml.Marshal(data)
 	if yamlErr != nil {
 		panic(yamlErr)

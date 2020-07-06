@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/aws/external"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"gopkg.in/yaml.v2"
 )
 
 type S3Backend struct {
@@ -17,7 +18,7 @@ type S3Backend struct {
 	Region string
 }
 
-func (backend S3Backend) Load() ([]byte, error) {
+func NewS3Client() (*s3.Client, context.Context) {
 	cfg, err := external.LoadDefaultAWSConfig()
 	if err != nil {
 		panic(err)
@@ -25,6 +26,11 @@ func (backend S3Backend) Load() ([]byte, error) {
 
 	svc := s3.New(cfg)
 	ctx := context.Background()
+	return svc, ctx
+}
+
+func (backend S3Backend) Load() ([]byte, error) {
+	svc, ctx := NewS3Client()
 	req := svc.GetObjectRequest(&s3.GetObjectInput{
 		Bucket: aws.String(backend.Bucket),
 		Key:    aws.String(strings.Trim(backend.Path, "/")),
@@ -42,14 +48,13 @@ func (backend S3Backend) Load() ([]byte, error) {
 	return content, nil
 }
 
-func (backend S3Backend) Save(data []byte) (bool, error) {
-	cfg, cfgErr := external.LoadDefaultAWSConfig()
-	if cfgErr != nil {
-		panic(cfgErr)
+func (backend S3Backend) Save(data interface{}) (bool, error) {
+	dataBytes, yamlErr := yaml.Marshal(data)
+	if yamlErr != nil {
+		panic(yamlErr)
 	}
-	reader := bytes.NewReader(data)
-	svc := s3.New(cfg)
-	ctx := context.Background()
+	reader := bytes.NewReader(dataBytes)
+	svc, ctx := NewS3Client()
 	req := svc.PutObjectRequest(&s3.PutObjectInput{
 		Bucket: aws.String(backend.Bucket),
 		Key:    aws.String(strings.Trim(backend.Path, "/")),

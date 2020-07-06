@@ -46,7 +46,7 @@ var (
 
 type Backend interface {
 	Load() ([]byte, error)
-	Save([]byte) (bool, error)
+	Save(interface{}) (bool, error)
 }
 
 type TokenStore struct {
@@ -69,8 +69,8 @@ func (ts *TokenStore) Init() {
 	case "s3":
 		backend = S3Backend{
 			Bucket: source.Host,
-			Region: "eu-central-1",
-			Path:   source.Path}
+			//Region: "eu-central-1",
+			Path: source.Path}
 	default:
 	}
 	ts.Backend = backend
@@ -82,7 +82,6 @@ func (ts *TokenStore) Init() {
 func usage() {
 	fmt.Fprintf(os.Stderr,
 		`%s %s-%s
-	
 	important: this token helper is not meant to be executed directly
 	supported commands: get, store, erase
 `, os.Args[0], gitTag, gitRef,
@@ -99,29 +98,25 @@ func main() {
 		os.Exit(101)
 	}
 	if len(os.Args) >= 2 {
-		ts := &TokenStore{
+		store := &TokenStore{
 			DataSourceURI: VAULT_TOKEN_SRC,
 		}
-		ts.Init()
+		store.Init()
 		switch os.Args[1] {
 		case "get":
-			token, _ := ts.Data[hashedAddr].(string)
+			token, _ := store.Data[hashedAddr].(string)
 			fmt.Fprintf(os.Stdout, "%s", token)
 		case "store":
 			reader := bufio.NewReader(os.Stdin)
 			token, _ := reader.ReadString('\n')
-			ts.Data[hashedAddr] = token
+			store.Data[hashedAddr] = token
 		case "erase":
-			delete(ts.Data, hashedAddr)
+			delete(store.Data, hashedAddr)
 		default:
 			usage()
 			os.Exit(1)
 		}
-		storeBytes, err := yaml.Marshal(ts.Data)
-		if err != nil {
-			panic(err)
-		}
-		ts.Backend.Save(storeBytes)
+		store.Backend.Save(store.Data)
 	} else {
 		usage()
 	}
