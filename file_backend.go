@@ -30,7 +30,7 @@ func (backend FileBackend) Save(data interface{}) (bool, error) {
 	writeErr := ioutil.WriteFile(
 		backend.FilePath,
 		dataBytes,
-		0400)
+		0600)
 
 	if writeErr != nil {
 		panic(writeErr)
