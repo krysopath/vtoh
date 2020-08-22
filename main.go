@@ -67,11 +67,12 @@ func (ts *TokenStore) Init() {
 	case "file":
 		backend = FileBackend{FilePath: source.Path}
 	case "gpg":
+		q := source.Query()
 		backend = GpgBackend{
-			FilePath:    source.Path,
-			Recipients:  []string{"test@example.com"},
-			KeyRingHome: "/home/gve/src/token-helper/gnupg"}
-		//KeyRingHome: filepath.Join(User.HomeDir, ".gnupg")}
+			FilePath:   source.Path,
+			Recipients: q["recipients"],
+			//KeyRingHome: "/home/gve/src/token-helper/gnupg"}
+			KeyRingHome: filepath.Join(User.HomeDir, ".token-helper")}
 	case "s3":
 		backend = S3Backend{
 			Bucket: source.Host,
@@ -96,7 +97,7 @@ func usage() {
 	important: this token helper is not meant to be executed directly
 	supported commands: get, store, erase & config
 
-	where only config is intended to invoked interactively
+	where only config is intended to be invoked interactively
 `, os.Args[0], gitTag, gitRef,
 	)
 }
