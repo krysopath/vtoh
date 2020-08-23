@@ -10,6 +10,7 @@ import (
 	"os/user"
 	"path/filepath"
 
+	"github.com/krysopath/vtoh/backends"
 	"gopkg.in/yaml.v2"
 )
 
@@ -65,16 +66,16 @@ func (ts *TokenStore) Init() {
 
 	switch source.Scheme {
 	case "file":
-		backend = FileBackend{FilePath: source.Path}
+		backend = backends.FileBackend{FilePath: source.Path}
 	case "gpg":
 		q := source.Query()
-		backend = GpgBackend{
+		backend = backends.GpgBackend{
 			FilePath:   source.Path,
 			Recipients: q["recipients"],
 			//KeyRingHome: "/home/gve/src/token-helper/gnupg"}
 			KeyRingHome: filepath.Join(User.HomeDir, ".token-helper")}
 	case "s3":
-		backend = S3Backend{
+		backend = backends.S3Backend{
 			Bucket: source.Host,
 			//Region: "eu-central-1",
 			Path: source.Path}

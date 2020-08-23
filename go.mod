@@ -1,4 +1,4 @@
-module github.com/krysopath/vtoken-helper
+module github.com/krysopath/vtoh
 
 go 1.14
 
